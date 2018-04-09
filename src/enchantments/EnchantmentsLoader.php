@@ -75,13 +75,11 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 	 * @ignoreCancelled false
 	 */
 	public function onInventoryPickupArrow(InventoryPickupArrowEvent $event): void{
-		if($event->getInventory()->getHolder() instanceof Player){
-			$entity = $event->getArrow();
+		$entity = $event->getArrow();
 
-			if($entity->namedtag->getShort('isInfinity', 0)){
-				$event->setCancelled();
-				$entity->close();
-			}
+		if($entity->namedtag->getShort('isInfinity', 0)){
+			$event->setCancelled();
+			$entity->close();
 		}
 	}
 
