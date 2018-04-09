@@ -87,7 +87,7 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 	 * @param BlockBreakEvent $event
 	 *
 	 * @priority LOWEST
-	 * $ignoreCancelled true
+	 * @ignoreCancelled true
 	 */
 	public function onBlockBreak(BlockBreakEvent $event): void{
 		$drops = $event->getDrops();
