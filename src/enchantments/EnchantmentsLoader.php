@@ -48,7 +48,7 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 			
 			if($bow->hasEnchantment(Enchantment::INFINITY)){
 				if(!($entity->getGamemode() % 2)){
-					$entity->getInventory()->addItem(Item::get(262));
+					$entity->getInventory()->addItem(Item::get(Item::BOW));
 				}
 
 				$projectile->namedtag->setShort('isInfinity', 1);
@@ -93,68 +93,54 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 		$drops = $event->getDrops();
 
 		if(count($drops) > 0){
-			$player = $event->getPlayer();
-			$level = $player->getInventory()->getItemInHand()->getEnchantmentLevel(Enchantment::FORTUNE);
+			$level = $event->getPlayer()->getInventory()->getItemInHand()->getEnchantmentLevel(Enchantment::FORTUNE);
 
 			if($level > 0){
-				$count = 0;
-
 				switch($event->getBlock()->getId()){
 					case Item::EMERALD_ORE: {
-						$count = rand(0, $level);
-						$item = Item::get(Item::EMERALD);
+						$event->setDrops([Item::get(Item::EMERALD, 0, 1 + rand(0, $level))]);
 						break;
 					}
 
 					case Item::DIAMOND_ORE: {
-						$count = rand(0, $level);
-						$item = Item::get(Item::DIAMOND);
+						$event->setDrops([Item::get(Item::DIMOND, 0, 1 + rand(0, $level))]);
 						break;
 					}
 
+					case Item::LIT_REDSTONE_ORE: 
 					case Item::REDSTONE_ORE: {
-						$count = rand(1, $level + 4);
-						$item = Item::get(Item::REDSTONE_DUST);
+						$event->setDrops([Item::get(Item::REDSTONE_DUST, 0, rand(4, 5) + rand(0, $level + rand(0, 3)))]);
 						break;
 					}
 
 					case Item::LAPIS_ORE: {
-						$count = rand(1, $level + 4);
-						$item = Item::get(Item::DYE, 4);
+						$event->setDrops([Item::get(Item::DYE, 4, rand(4, 8) + rand(0, $level + rand(0, 5)))]);
 						break;
 					}
 
 					case Item::COAL_ORE: {
-						$count = rand(0, $level + 1);
-						$item = Item::get(Item::COAL);
+						$event->setDrops([Item::get(Item::COAL, 0, 1 + rand(0, $level))]);
 						break;
 					}
 
-					case Item::LEAVES: {
-						if($ev->getBlock()->getDamage() !== 0){
-							return;
-						}
-
-						if($level * 3 >= rand(0, 100)){ //TODO: как-то улучшить это говно.
-							$ev->setDrops([Item::get(Item::APPLE)]); 
+					case Item::GRAVEL: {
+						if($level >= 3){
+							$ev->setDrops([Item::get(Item::FLINT)]);
 							return;
 						}
 						break;
 					}
 
-					//TODO: добавить еще блоки.
-					default: {
-						return;
+					case Item::MELON_BLOCK: {
+						$event->setDrops([Item::get(Item::MELON, 0, rand(3, 7) + rand(0, $level + rand(0, 4)))]);
+						break;
+					}
+
+					case Item::GLOWSTONE: {
+						$event->setDrops([Item::get(Item::GLOWSTONE_DUST, 0, rand(2, 4) + rand(0, $level + rand(0, 2)))]);
+						break;
 					}
 				}
-			}
-
-			if($count > 0){
-				while($count-- > 0){
-					$drops[] = $item;
-				}
-
-				$event->setDrops($drops);
 			}
 		}
 	}
