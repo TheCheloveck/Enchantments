@@ -125,7 +125,7 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 
 					case Item::GRAVEL: {
 						if($level >= 3){
-							$ev->setDrops([Item::get(Item::FLINT)]);
+							$event->setDrops([Item::get(Item::FLINT)]);
 							return;
 						}
 						break;
