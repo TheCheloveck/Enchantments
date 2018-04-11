@@ -12,10 +12,14 @@ use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\entity\EntityShootBowEvent;
 use pocketmine\event\entity\EntityDamageByEntityEvent;
 use pocketmine\event\entity\EntityDamageByChildEntityEvent;
+use pocketmine\event\entity\EntityDeathEvent;
+use pocketmine\event\entity\ProjectileHitBlockEvent;
 use pocketmine\event\inventory\InventoryPickupArrowEvent;
 use pocketmine\entity\projectile\Arrow;
+use pocketmine\entity\Human;
 use pocketmine\item\enchantment\Enchantment;
 use pocketmine\item\Item;
+use pocketmine\block\TNT;
 
 class EnchantmentsLoader extends PluginBase implements Listener{
 
@@ -27,8 +31,8 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 		Enchantment::registerEnchantment(new Enchantment(Enchantment::PUNCH, 'Punch',  Enchantment::RARITY_UNCOMMON, Enchantment::SLOT_BOW, 2));
 		Enchantment::registerEnchantment(new Enchantment(Enchantment::INFINITY, 'Infinity', Enchantment::RARITY_UNCOMMON, Enchantment::SLOT_BOW, 1));
 		Enchantment::registerEnchantment(new Enchantment(Enchantment::FIRE_ASPECT, 'Fire aspect', Enchantment::RARITY_UNCOMMON, Enchantment::SLOT_SWORD, 2));
-		//Убрано из-за одного бага (при отмененном событии все равно может немного поджигать).
-		//Enchantment::registerEnchantment(new Enchantment(Enchantment::FLAME, 'Flame', Enchantment::RARITY_UNCOMMON, Enchantment::SLOT_BOW, 1)); 
+		Enchantment::registerEnchantment(new Enchantment(Enchantment::FLAME, 'Flame', Enchantment::RARITY_UNCOMMON, Enchantment::SLOT_BOW, 1)); 
+		Enchantment::registerEnchantment(new Enchantment(Enchantment::LOOTING, 'Looting', Enchantment::RARITY_UNCOMMON, Enchantment::SLOT_SWORD, 3));
 
 		$this->getServer()->getPluginManager()->registerEvents($this, $this);
 	}
@@ -64,6 +68,12 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 
 			if($level > 0){
 				$projectile->namedtag->setShort('PunchEnch', $level);
+			}
+
+			$level = $bow->getEnchantmentLevel(Enchantment::FLAME);
+
+			if($level > 0){
+				$projectile->setOnFire($level * 4);
 			}
 		}
 	}
@@ -126,7 +136,6 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 					case Item::GRAVEL: {
 						if($level >= 3){
 							$event->setDrops([Item::get(Item::FLINT)]);
-							return;
 						}
 						break;
 					}
@@ -198,6 +207,54 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 						$entity->setOnFire($level * 3 + 1);
 					}
 				} 
+			}
+		}
+	}
+
+	/**
+	 * @param EntityDeathEvent $event
+	 *
+	 * @priority LOWEST
+	 */
+	public function onEntityDeath(EntityDeathEvent $event){
+		$entity = $event->getEntity();
+
+		if(!$entity instanceof Human){
+			$damageEvent = $entity->getLastDamageCause();
+
+			if($damageEvent instanceof EntityDamageByEntityEvent){
+				$damager = $damageEvent->getDamager();
+
+				if($damager instanceof Player){
+					$level = $damager->getInventory()->getItemInHand()->getEnchantmentLevel(Enchantment::LOOTING);
+
+					if($level > 0){
+						$drops = [];
+
+						foreach($event->getDrops() as $drop){
+							$drops[] = $drop->setCount($drop->getCount() + rand(0, $level));
+						}
+
+						$event->setDrops($drops);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param ProjectileHitBlockEvent $event
+	 *
+	 * @priority LOWEST
+	 */
+	public function onProjectileHitBlock(ProjectileHitBlockEvent $event){
+		$entity = $event->getEntity();
+
+		if($entity instanceof Arrow && $entity->isOnFire()){
+			$block = $event->getBlockHit();
+
+			if($block instanceof TNT){
+				$block->ignite();
 			}
 		}
 	}
