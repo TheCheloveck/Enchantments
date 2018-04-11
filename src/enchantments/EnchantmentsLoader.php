@@ -52,7 +52,7 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 			
 			if($bow->hasEnchantment(Enchantment::INFINITY)){
 				if(!($entity->getGamemode() % 2)){
-					$entity->getInventory()->addItem(Item::get(Item::BOW));
+					$entity->getInventory()->addItem(Item::get(Item::ARROW));
 				}
 
 				$projectile->namedtag->setShort('isInfinity', 1);
