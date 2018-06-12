@@ -216,7 +216,7 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 	 *
 	 * @priority LOWEST
 	 */
-	public function onEntityDeath(EntityDeathEvent $event){
+	public function onEntityDeath(EntityDeathEvent $event): void{
 		$entity = $event->getEntity();
 
 		if(!$entity instanceof Human){
@@ -247,7 +247,7 @@ class EnchantmentsLoader extends PluginBase implements Listener{
 	 *
 	 * @priority LOWEST
 	 */
-	public function onProjectileHitBlock(ProjectileHitBlockEvent $event){
+	public function onProjectileHitBlock(ProjectileHitBlockEvent $event): void{
 		$entity = $event->getEntity();
 
 		if($entity instanceof Arrow && $entity->isOnFire()){
